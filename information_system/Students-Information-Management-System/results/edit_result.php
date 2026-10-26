@@ -1,0 +1,11 @@
+<?php
+require_once __DIR__ . '/../includes/auth.php'; require_once __DIR__ . '/../config/database.php';
+$id=(int)($_GET['id']??0);$stmt=$pdo->prepare("SELECT r.*,s.student_no,s.first_name,s.last_name,c.course_code,c.course_name FROM results r JOIN enrollments e ON e.id=r.enrollment_id JOIN students s ON s.id=e.student_id JOIN courses c ON c.id=e.course_id WHERE r.id=?");$stmt->execute([$id]);$r=$stmt->fetch();if(!$r){header("Location: results.php");exit;}$error='';
+function calculateGrade($score){if($score>=90)return'A+';if($score>=85)return'A';if($score>=80)return'B+';if($score>=75)return'B';if($score>=70)return'C+';if($score>=60)return'C';if($score>=50)return'D';return'F';}
+if($_SERVER['REQUEST_METHOD']==='POST'){$score=(float)($_POST['score']??-1);$remarks=trim($_POST['remarks']??'');if($score<0||$score>100)$error='Score must be between 0 and 100.';else{$stmt=$pdo->prepare("UPDATE results SET score=?,grade=?,remarks=? WHERE id=?");$stmt->execute([$score,calculateGrade($score),$remarks,$id]);header("Location: results.php");exit;}}
+?>
+<?php include __DIR__ . '/../includes/header.php'; include __DIR__ . '/../includes/navbar.php'; ?><div class="layout"><?php include __DIR__ . '/../includes/sidebar.php'; ?><main class="content">
+<div class="page-heading"><h2>Edit Result</h2></div><?php if($error):?><div class="alert alert-danger"><?=htmlspecialchars($error)?></div><?php endif;?>
+<div class="panel"><p><strong>Student:</strong> <?=htmlspecialchars($r['student_no'].' - '.$r['first_name'].' '.$r['last_name'])?><br><strong>Course:</strong> <?=htmlspecialchars($r['course_code'].' - '.$r['course_name'])?></p>
+<form method="post" class="form-grid"><label>Score<input type="number" name="score" min="0" max="100" step="0.01" value="<?=htmlspecialchars($r['score'])?>" required></label><label class="full">Remarks<textarea name="remarks" rows="3"><?=htmlspecialchars($r['remarks']??'')?></textarea></label><div><button class="btn btn-primary">Update</button> <a class="btn" href="results.php">Cancel</a></div></form></div>
+</main></div><?php include __DIR__ . '/../includes/footer.php'; ?>

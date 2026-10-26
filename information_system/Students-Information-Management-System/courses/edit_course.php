@@ -1,0 +1,9 @@
+<?php
+require_once __DIR__ . '/../includes/auth.php'; require_once __DIR__ . '/../config/database.php';
+$id=(int)($_GET['id']??0);$stmt=$pdo->prepare("SELECT * FROM courses WHERE id=?");$stmt->execute([$id]);$c=$stmt->fetch();if(!$c){header("Location: courses.php");exit;}$error='';
+if($_SERVER['REQUEST_METHOD']==='POST'){$data=[trim($_POST['course_name']??''),(int)($_POST['credit_hours']??3),trim($_POST['department']??''),trim($_POST['description']??''),$id];if($data[0]===''||$data[2]==='')$error='Course name and department are required.';else{$stmt=$pdo->prepare("UPDATE courses SET course_name=?,credit_hours=?,department=?,description=? WHERE id=?");$stmt->execute($data);header("Location: courses.php");exit;}}
+?>
+<?php include __DIR__ . '/../includes/header.php'; include __DIR__ . '/../includes/navbar.php'; ?><div class="layout"><?php include __DIR__ . '/../includes/sidebar.php'; ?><main class="content">
+<div class="page-heading"><h2>Edit Course</h2></div><?php if($error):?><div class="alert alert-danger"><?=htmlspecialchars($error)?></div><?php endif;?>
+<div class="panel"><form method="post" class="form-grid"><label>Course Code<input value="<?=htmlspecialchars($c['course_code'])?>" disabled></label><label>Course Name<input name="course_name" value="<?=htmlspecialchars($c['course_name'])?>" required></label><label>Credit Hours<input type="number" name="credit_hours" min="1" max="12" value="<?=htmlspecialchars($c['credit_hours'])?>" required></label><label>Department<input name="department" value="<?=htmlspecialchars($c['department'])?>" required></label><label class="full">Description<textarea name="description" rows="4"><?=htmlspecialchars($c['description']??'')?></textarea></label><div><button class="btn btn-primary">Update</button> <a class="btn" href="courses.php">Cancel</a></div></form></div>
+</main></div><?php include __DIR__ . '/../includes/footer.php'; ?>

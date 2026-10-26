@@ -1,0 +1,8 @@
+<?php
+require_once __DIR__ . '/../includes/auth.php'; require_once __DIR__ . '/../config/database.php';
+$rows=$pdo->query("SELECT s.student_no,s.first_name,s.last_name,s.department,c.course_code,c.course_name,r.score,r.grade,r.remarks FROM results r JOIN enrollments e ON e.id=r.enrollment_id JOIN students s ON s.id=e.student_id JOIN courses c ON c.id=e.course_id ORDER BY s.department,s.student_no,c.course_code")->fetchAll();
+?>
+<?php include __DIR__ . '/../includes/header.php'; include __DIR__ . '/../includes/navbar.php'; ?><div class="layout"><?php include __DIR__ . '/../includes/sidebar.php'; ?><main class="content">
+<div class="page-heading"><h2>Result Report</h2><button class="btn" onclick="window.print()">Print</button></div>
+<div class="panel table-wrap"><table><thead><tr><th>Student No.</th><th>Student</th><th>Department</th><th>Course</th><th>Score</th><th>Grade</th><th>Remarks</th></tr></thead><tbody><?php foreach($rows as $r):?><tr><td><?=htmlspecialchars($r['student_no'])?></td><td><?=htmlspecialchars($r['first_name'].' '.$r['last_name'])?></td><td><?=htmlspecialchars($r['department'])?></td><td><?=htmlspecialchars($r['course_code'].' - '.$r['course_name'])?></td><td><?=htmlspecialchars($r['score'])?></td><td><?=htmlspecialchars($r['grade'])?></td><td><?=htmlspecialchars($r['remarks']??'')?></td></tr><?php endforeach;?></tbody></table></div>
+</main></div><?php include __DIR__ . '/../includes/footer.php'; ?>
